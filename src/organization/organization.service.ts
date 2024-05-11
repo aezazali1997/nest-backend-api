@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,22 +13,33 @@ import {
 import { Model } from 'mongoose';
 import { Payload } from 'src/user/entities/user.entity';
 import { UserRole } from 'src/user/dto/create-user.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class OrganizationService {
   constructor(
     @InjectModel(Organization.name)
     private organizationModel: Model<OrganizationDocument>,
+    private readonly userService: UserService,
   ) {}
 
-  create(user: Payload, createOrganizationDto: CreateOrganizationDto) {
+  async create(user: Payload, createOrganizationDto: CreateOrganizationDto) {
     if (user.role === UserRole.USER) {
       throw new ForbiddenException('Access Issue');
     }
-    const createdOrganization = new this.organizationModel(
+
+    const organization = await this.organizationModel.find({
+      bussinessEmail: createOrganizationDto.bussinessEmail,
+    });
+
+    if (organization.length > 0) {
+      throw new HttpException('Bussiness Email already used', 200);
+    }
+
+    const createdOrganization = await new this.organizationModel(
       createOrganizationDto,
-    );
-    return createdOrganization.save();
+    ).save();
+    return createdOrganization;
   }
 
   findAll(user: Payload) {

@@ -80,7 +80,6 @@ export class UserService {
     }
 
     for (const key of Object.keys(updateUserDto)) {
-      console.log('key', key);
       if (key === 'password') {
         const hashedPassword = await bcrypt.hash(updateUserDto[key], 10);
         user[key] = hashedPassword;
