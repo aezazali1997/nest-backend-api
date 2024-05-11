@@ -10,6 +10,7 @@ import { User, UserDocument } from './entities/user.entity';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
+import { Payload } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -21,25 +22,38 @@ export class UserService {
   }
 
   async findAll(email: string, page: number = 1, limit: number = 10) {
+    const user: any = await this.userModel.findOne({
+      email,
+    });
     const users = await this.userModel
-      .find()
+      .find({
+        role: 'user',
+        organizationId: user.organizationId,
+      })
       .limit(limit)
       .skip((page - 1) * limit)
       .sort({
         updatedAt: 'desc',
       });
+    // only include organizations related
+
     if (!users || !Array.isArray(users)) {
       throw new HttpException('Record Not Found', 200);
     }
     return users;
   }
 
-  async findOne(email: string, id: string) {
+  async findOne(userPayload: Payload, id: string) {
+    // logged in user email and role
+    const { email, role } = userPayload;
+    // user for specific id
     const user = await this.userModel.findById(id).exec();
     if (!user) {
       throw new HttpException('User Not Found', 200);
     }
-    if (user.role === UserRole.USER) {
+    // check if user is a normal user
+    if (role === UserRole.USER) {
+      // restrict if someone trying to access some other user info
       if (user.email !== email) {
         throw new ForbiddenException('Access Issue');
       }
@@ -47,12 +61,19 @@ export class UserService {
     return user;
   }
 
-  async update(email: string, id: string, updateUserDto: UpdateUserDto) {
+  async update(userPayload: Payload, id: string, updateUserDto: UpdateUserDto) {
+    // logged in user email and role
+    const { email, role } = userPayload;
+    // user for specific id
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    if (user.role === UserRole.USER) {
+
+    // check if user is a normal user
+    if (role === UserRole.USER) {
+      // restrict if someone trying to access some other user info
+
       if (user.email !== email) {
         throw new ForbiddenException('Access Issue');
       }
@@ -72,12 +93,17 @@ export class UserService {
     return newUser;
   }
 
-  async remove(email: string, id: string) {
+  async remove(userPayload: Payload, id: string) {
+    // logged in user email and role
+    const { email, role } = userPayload;
+    // user for specific id
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    if (user.role === UserRole.USER) {
+    // check if user is a normal user
+    if (role === UserRole.USER) {
+      // restrict if someone trying to access some other user info
       if (user.email !== email) {
         throw new ForbiddenException('Access Issue');
       }

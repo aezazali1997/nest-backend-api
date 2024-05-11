@@ -24,6 +24,11 @@ export class User {
 
   @Prop({ required: true })
   addresses: Address[];
+
+  @Prop({
+    required: true,
+  })
+  organizationId: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
@@ -37,3 +42,11 @@ export type Address = {
   role: string;
   phoneNo: string;
 };
+export type Payload = {
+  email: string;
+  sub: string;
+  role: string;
+};
+export interface ExtendedRequest extends Request {
+  user: Payload;
+}

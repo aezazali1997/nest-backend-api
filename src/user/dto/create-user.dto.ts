@@ -29,4 +29,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsArray()
   addresses: Address[];
+
+  @IsNotEmpty()
+  organizationId: string;
 }

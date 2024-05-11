@@ -9,7 +9,7 @@ import {
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { UserDocument } from 'src/user/entities/user.entity';
+import { UserDocument } from '../user/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
