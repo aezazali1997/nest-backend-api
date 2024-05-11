@@ -1,33 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, HttpException, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { LoginDto } from '../auth/dto/login.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly authService: AuthService,private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-  @Post("register")
-  async register(@Body(ValidationPipe) userDto: CreateUserDto): Promise<void> {
-    await this.authService.register(userDto);
-  }
-
+  @UseGuards(AuthGuard)
   @Get()
   findAll() {
-    return this.userService.findAll();
+    const users= this.userService.findAll();
+    if(!users || Array.isArray(users)){
+      throw new HttpException('Record Not Found',200)
+    }
+    return users;
   }
-
+  
+  
+  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    const user= this.userService.findOne(+id);
+    if(!user){
+      throw new HttpException('User Not Found',200)
+    }
+    return user;
+
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
+
+
+
+
+  
+  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);

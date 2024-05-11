@@ -4,8 +4,11 @@ import { HydratedDocument } from 'mongoose';
 export type UserDocument = HydratedDocument<User>;
 
 
-@Schema()
+@Schema({
+  timestamps:true
+})
 export class User {
+
    @Prop({ required: true })
   name: string;
 
