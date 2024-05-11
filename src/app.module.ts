@@ -12,8 +12,7 @@ import { AuthModule } from './auth/auth.module';
 
 
 @Module({
-  imports: [ConfigModule.forRoot(
-  ),MongooseModule.forRoot(process.env.DATABASE_URL), 
+  imports: [MongooseModule.forRoot(process.env.DATABASE_URL), 
    MongooseModule.forFeature([
       { name: User.name, schema: UserSchema }]),
      
