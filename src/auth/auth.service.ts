@@ -1,16 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from "bcrypt";
 import { LoginDto } from 'src/auth/dto/login.dto';
 import { UserDocument } from 'src/user/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
