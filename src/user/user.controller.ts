@@ -1,10 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ValidationPipe, HttpException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthService } from 'src/auth/auth.service';
-import { LoginDto } from '../auth/dto/login.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Request } from 'express';
+
+type Payload = {
+  email: string;
+  sub: string;
+};
+interface ExtendedRequest extends Request {
+  user: Payload;
+}
 
 @Controller('user')
 export class UserController {
@@ -12,40 +28,49 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    const users= this.userService.findAll();
-    if(!users || Array.isArray(users)){
-      throw new HttpException('Record Not Found',200)
+  async findAll(
+    @Req() req: ExtendedRequest,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    try {
+      return await this.userService.findAll(req.user.email, page, limit);
+    } catch (error) {
+      throw error;
     }
-    return users;
   }
-  
-  
+
   @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const user= this.userService.findOne(+id);
-    if(!user){
-      throw new HttpException('User Not Found',200)
+  findOne(@Param('id') id: string, @Req() req: ExtendedRequest) {
+    try {
+      return this.userService.findOne(req.user.email, id);
+    } catch (error) {
+      throw error;
     }
-    return user;
-
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: ExtendedRequest,
+  ) {
+    try {
+      return this.userService.update(req.user.email, id, updateUserDto);
+    } catch (error) {
+      throw error;
+    }
   }
 
-
-
-
-
-  
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: ExtendedRequest) {
+    try {
+      return this.userService.remove(req.user.email, id);
+    } catch (error) {
+      throw error;
+    }
   }
 }
