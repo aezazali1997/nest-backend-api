@@ -25,17 +25,29 @@ export class UserService {
     const user: any = await this.userModel.findOne({
       email,
     });
-    const users = await this.userModel
-      .find({
-        role: 'user',
-        organizationId: user.organizationId,
-      })
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .sort({
-        updatedAt: 'desc',
-      });
-    // only include organizations related
+    let users;
+    if (user.role !== UserRole.ADMIN) {
+      users = await this.userModel
+        .find({
+          role: 'user',
+          organizationId: user.organizationId,
+        })
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .sort({
+          updatedAt: 'desc',
+        });
+    } else {
+      users = await this.userModel
+        .find({
+          role: 'user',
+        })
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .sort({
+          updatedAt: 'desc',
+        });
+    }
 
     if (!users || !Array.isArray(users)) {
       throw new HttpException('Record Not Found', 200);
@@ -50,13 +62,6 @@ export class UserService {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
       throw new HttpException('User Not Found', 200);
-    }
-    // check if user is a normal user
-    if (role === UserRole.USER) {
-      // restrict if someone trying to access some other user info
-      if (user.email !== email) {
-        throw new ForbiddenException('Access Issue');
-      }
     }
     return user;
   }
