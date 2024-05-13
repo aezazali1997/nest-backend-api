@@ -27,26 +27,24 @@ export class UserService {
     });
     let users;
     if (user.role !== UserRole.ADMIN) {
-      users = await this.userModel
-        .find({
-          role: 'user',
-          organizationId: user.organizationId,
-        })
-        .limit(limit)
-        .skip((page - 1) * limit)
-        .sort({
-          updatedAt: 'desc',
-        });
+      users = await this.userModel.find({
+        role: 'user',
+        organizationId: user.organizationId,
+      });
+      // .limit(limit)
+      // .skip((page - 1) * limit)
+      // .sort({
+      //   updatedAt: 'desc',
+      // });
+      // will work with infinite pagination
     } else {
-      users = await this.userModel
-        .find({
-          role: 'user',
-        })
-        .limit(limit)
-        .skip((page - 1) * limit)
-        .sort({
-          updatedAt: 'desc',
-        });
+      users = await this.userModel.find();
+      // .limit(limit)
+      // .skip((page - 1) * limit)
+      // .sort({
+      //   updatedAt: 'desc',
+      // });
+      // will work with infinite pagination
     }
 
     if (!users || !Array.isArray(users)) {
