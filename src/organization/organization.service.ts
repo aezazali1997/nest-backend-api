@@ -48,6 +48,9 @@ export class OrganizationService {
     }
     return this.organizationModel.find().exec();
   }
+  findAllPublic() {
+    return this.organizationModel.find({}, { title: 1 }).exec();
+  }
 
   async remove(user: Payload, id: string) {
     const organization = await this.organizationModel.findById(id);

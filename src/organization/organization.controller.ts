@@ -17,6 +17,11 @@ import { ExtendedRequest } from 'src/user/entities/user.entity';
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
+  @Get('/public')
+  findAllPublic() {
+    return this.organizationService.findAllPublic();
+  }
+
   @UseGuards(AuthGuard)
   @Post()
   create(
@@ -30,6 +35,7 @@ export class OrganizationController {
   findAll(@Req() req: ExtendedRequest) {
     return this.organizationService.findAll(req.user);
   }
+
   @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: ExtendedRequest) {
